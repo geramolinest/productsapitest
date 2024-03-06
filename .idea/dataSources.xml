@@ -5,7 +5,7 @@
       <driver-ref>azure.ms</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
-      <jdbc-url>jdbc:sqlserver://127.0.0.1:1433</jdbc-url>
+      <jdbc-url>jdbc:sqlserver://127.0.0.1:1433;database=productsdb</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <driver-properties>
         <property name="trustServerCertificate" value="true" />
