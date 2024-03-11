@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from typing import Type
@@ -6,11 +5,12 @@ from automapper import mapper
 
 from models import models
 from schemas import schemas
+from exceptions import exceptions
 
 
 def get_all_owners(db: Session, skip: int = 0, limit: int = 100) -> list[schemas.OwnerGet]:
-
-    owners_db: list[Type[models.Owner]] = db.query(models.Owner).order_by(asc(models.Owner.id)).offset(skip).limit(limit).all()
+    owners_db: list[Type[models.Owner]] = db.query(models.Owner).order_by(asc(models.Owner.id)).offset(skip).limit(
+        limit).all()
 
     owners_mapped: list[schemas.OwnerGet] = []
 
@@ -21,11 +21,10 @@ def get_all_owners(db: Session, skip: int = 0, limit: int = 100) -> list[schemas
 
 
 def get_owner(db: Session, owner_id: int) -> schemas.OwnerGet:
-
     owner_db: Type[models.Owner] = db.query(models.Owner).filter(models.Owner.id == owner_id).first()
 
     if owner_db is None:
-        raise HTTPException(status_code=404, detail="Owner doesn't exists")
+        raise exceptions.HTTPNotFoundException(detail="Owner does not exists")
 
     owner_mapped: schemas.OwnerGet = mapper.to(schemas.OwnerGet).map(owner_db)
 
@@ -33,8 +32,7 @@ def get_owner(db: Session, owner_id: int) -> schemas.OwnerGet:
 
 
 def create_owner(db: Session, owner: schemas.Owner) -> schemas.OwnerGet:
-
-    owner_mapped = mapper.to(models.Owner).map(owner)
+    owner_mapped: models.Owner = mapper.to(models.Owner).map(owner)
 
     db.add(owner_mapped)
     db.commit()
@@ -43,3 +41,32 @@ def create_owner(db: Session, owner: schemas.Owner) -> schemas.OwnerGet:
     owner_mapped_saved: schemas.OwnerGet = mapper.to(schemas.OwnerGet).map(owner_mapped)
 
     return owner_mapped_saved
+
+
+def update_owner(db: Session, owner_id: int, owner: schemas.Owner) -> schemas.OwnerGet:
+    owner_from_db: Type[models.Owner] = db.query(models.Owner).filter(models.Owner.id == owner_id).first()
+
+    if owner_from_db is None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Invalid owner")
+
+    owner_from_db.email = owner.email
+    owner_from_db.name = owner.name.title()
+
+    db.commit()
+    db.refresh(owner_from_db)
+
+    owner_mapped_saved: schemas.OwnerGet = mapper.to(schemas.OwnerGet).map(owner_from_db)
+
+    return owner_mapped_saved
+
+
+def delete_owner(db: Session, owner_id: int) -> int:
+    owner_from_db: Type[models.Owner] = db.query(models.Owner).filter(models.Owner.id == owner_id).first()
+
+    if owner_from_db is None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Invalid owner")
+
+    db.delete(owner_from_db)
+    db.commit()
+
+    return owner_id

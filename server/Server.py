@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import products_router, owners_route, categories_router
 from models import models
 from db.DBConnection import engine
+from middlewares.exceptions_middleware import ExceptionMiddleware
 
 
 class Server:
@@ -26,6 +27,7 @@ class Server:
             allow_methods=["*"],
             allow_headers=["*"]
         )
+        self.server.add_middleware(ExceptionMiddleware)
 
     def create_models(self) -> None:
         try:

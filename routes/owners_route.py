@@ -33,3 +33,15 @@ def get_owner(owner_id: int, db: Session = Depends(get_db)) -> responses.OkRespo
 @owners_router.post("/create", response_model=responses.CreatedResponse, status_code=status.HTTP_201_CREATED)
 def create_owner(owner: schemas.Owner, db: Session = Depends(get_db)) -> responses.CreatedResponse:
     return responses.CreatedResponse(owners_service.create_owner(db, owner).__dict__)
+
+
+@owners_router.put("/update/{owner_id}", response_model=responses.OkResponse, status_code=200)
+def update_owner(owner_id: int, owner: schemas.Owner, db: Session = Depends(get_db)) -> responses.OkResponse:
+    owner_updated: dict = owners_service.update_owner(db, owner_id, owner).__dict__
+    return responses.OkResponse(owner_updated)
+
+
+@owners_router.delete("/delete", response_model=responses.OkResponse, status_code=200)
+def delete_owner(owner_id: int, db: Session = Depends(get_db)) -> responses.OkResponse:
+    owner_id_deleted_dict: dict = {'owner_id': owners_service.delete_owner(db, owner_id)}
+    return responses.OkResponse(owner_id_deleted_dict)

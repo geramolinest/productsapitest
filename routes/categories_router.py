@@ -30,3 +30,15 @@ def get_category_by_id(category_id: int, db: Session = Depends(get_db)) -> respo
 @categories_router.post("/create", status_code=201, response_model=responses.CreatedResponse)
 def create_category(category: schemas.Category, db: Session = Depends(get_db)) -> responses.CreatedResponse:
     return responses.CreatedResponse(categories_service.create_category(db, category).__dict__)
+
+
+@categories_router.put("/update/{category_id}", status_code=200, response_model=responses.OkResponse)
+def update_category(category_id: int, category: schemas.Category,
+                    db: Session = Depends(get_db)) -> responses.OkResponse:
+    return responses.OkResponse(categories_service.update_category(db, category_id, category).__dict__)
+
+
+@categories_router.delete("/delete/{category_id}", status_code=200, response_model=responses.OkResponse)
+def delete_category(category_id: int, db: Session = Depends(get_db)) -> responses.OkResponse:
+    deleted_categroy: dict = {'category_id': categories_service.delete_category(db, category_id)}
+    return responses.OkResponse(deleted_categroy)
