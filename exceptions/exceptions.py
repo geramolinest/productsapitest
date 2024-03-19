@@ -25,3 +25,10 @@ class HTTPExceptionBadRequest(HTTPExceptionCustom):
 class HTTPNotFoundException(HTTPExceptionCustom):
     def __init__(self, detail: str = None) -> None:
         super().__init__(status_code=404, detail="Resource not found" if detail is None else detail)
+
+
+class CustomValidationException(HTTPExceptionCustom):
+    def __init__(self, errors: list) -> None:
+        super().__init__(status_code=400, detail='Field validation error')
+        self.status_text = "BAD_REQUEST"
+        self.errors: list = errors if errors is not None else []

@@ -63,6 +63,44 @@ def create_product(db: Session, product: schemas.Product) -> schemas.ProductGet:
     product_dict["category"] = product_to_be_added.category.__dict__
     product_dict["owner"] = product_to_be_added.owner.__dict__
 
-    product_saved_mapped = mapper.to(schemas.ProductGet).map(product_dict)
+    product_saved_mapped: schemas.ProductGet = mapper.to(schemas.ProductGet).map(product_dict)
 
     return product_saved_mapped
+
+
+def update_product(db: Session, product: schemas.Product, product_id: int) -> schemas.ProductGet:
+    product_db: Type[models.Product] = db.query(models.Product).filter(models.Product.id == product_id).first()
+
+    if product_db is None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Product does not exists")
+
+    product_db.title = product.title
+    product_db.description = product.description
+    product_db.price = product.price
+    product_db.category_id = product.category_id
+    product_db.owner_id = product.owner_id
+
+    db.commit()
+    db.refresh(product_db)
+
+    product_dict: dict = product_db.__dict__
+
+    product_dict["category"] = product_db.category.__dict__
+    product_dict["owner"] = product_db.owner.__dict__
+
+    product_saved_mapped: schemas.ProductGet = mapper.to(schemas.ProductGet).map(product_dict)
+
+    return product_saved_mapped
+
+
+def delete_product(db: Session, product_id: int) -> int:
+    product_to_be_deleted: Type[models.Product] = db.query(models.Product).filter(
+        models.Product.id == product_id).first()
+
+    if product_to_be_deleted is None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Product does not exists")
+
+    db.delete(product_to_be_deleted)
+    db.commit()
+
+    return product_id

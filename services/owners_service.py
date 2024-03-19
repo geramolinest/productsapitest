@@ -66,6 +66,16 @@ def delete_owner(db: Session, owner_id: int) -> int:
     if owner_from_db is None:
         raise exceptions.HTTPExceptionBadRequest(detail="Invalid owner")
 
+    has_category: Type[models.Category] = db.query(models.Category).filter(models.Category.owner_id == owner_id).first()
+
+    if has_category is not None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Owner has a an assigned category")
+
+    has_product: Type[models.Product] = db.query(models.Product).filter(models.Product.owner_id == owner_id).first()
+
+    if has_product is not None:
+        raise exceptions.HTTPExceptionBadRequest(detail="Owner has a an assigned product")
+
     db.delete(owner_from_db)
     db.commit()
 

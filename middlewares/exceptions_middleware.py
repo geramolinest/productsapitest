@@ -2,9 +2,10 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from traceback import print_exception
-from pydantic import ValidationError
+from fastapi.exceptions import RequestValidationError
 
 from exceptions import exceptions as ex
+from schemas import schemas
 
 
 class ExceptionMiddleware(BaseHTTPMiddleware):
@@ -27,11 +28,11 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                                            status_text=status_text_local, error=eh.__class__.__name__,
                                            messages=eh.args).__dict__
             )
-        except ValidationError as e:
+        except RequestValidationError as e:
             print_exception(e)
             return JSONResponse(
                 status_code=400,
-                content={'error': e.args}
+                content={'error': 'Error en entity'}
             )
         except Exception as e:
             print_exception(e)
@@ -42,3 +43,13 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                                            messages=e.args).__dict__
 
             )
+
+
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    custom_errors: list[dict] = []
+
+    for e in exc.errors():
+        error_dict: schemas.ValidationErrorSchema = schemas.ValidationErrorSchema(field=e['loc'][1], error=e['msg'])
+        custom_errors.append(error_dict.__dict__)
+
+    return JSONResponse(status_code=400, content=ex.CustomValidationException(custom_errors).__dict__)

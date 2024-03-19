@@ -54,3 +54,9 @@ class ProductGet(BaseModel):
     price: float
     category: CategoryGetProduct
     owner: OwnerGet
+
+
+# Validation error schema
+class ValidationErrorSchema(BaseModel):
+    field: str
+    error: str

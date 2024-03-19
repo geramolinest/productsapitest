@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from constants import environment
 
-SQLALCHEMY_DATABASE_URL = "mssql+pyodbc://sa:Geramolina123@localhost:1433/productsdb?driver=ODBC+Driver+18+for+SQL+Server"
+environment = environment.EnvironmentApp()
+
+SQLALCHEMY_DATABASE_URL = environment.mssql_host
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False, "TrustServerCertificate": "yes"}
