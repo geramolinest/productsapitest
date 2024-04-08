@@ -34,6 +34,6 @@ class Server:
 
     def create_models(self) -> None:
         try:
-            models.Base.metadata.create_all(engine)
+            models.Base.metadata.create_all(bind=engine)
         except Exception as e:
             print(e.args)

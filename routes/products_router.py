@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Coroutine
+
+from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.orm import Session
 
 from db.DBConnection import SessionLocal
